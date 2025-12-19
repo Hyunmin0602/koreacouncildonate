@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DonateDS - 후원 인증서 조회 시스템
 
-## Getting Started
+대한학생회 후원 인증서를 안전하게 조회할 수 있는 Next.js 애플리케이션입니다.
 
-First, run the development server:
+## 주요 기능
+
+- 🔍 후원 인증번호로 인증서 조회
+- 🔐 암호화된 URL로 보안 강화
+- 📊 Google Sheets 연동
+- 📱 반응형 디자인
+- 🎨 QR 코드 생성
+
+## 기술 스택
+
+- Next.js 16.1.0 (App Router)
+- TypeScript
+- Tailwind CSS
+- Google Sheets API
+- AES-256 암호화
+
+## 환경 설정
+
+1. `.env.example` 파일을 복사하여 `.env.local` 생성:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. `.env.local` 파일에 실제 값 입력:
+   - `GOOGLE_SHEET_ID`: Google Sheets 문서 ID
+   - `GOOGLE_CLIENT_EMAIL`: 서비스 계정 이메일
+   - `GOOGLE_PRIVATE_KEY`: 서비스 계정 비공개 키
+   - `ENCRYPTION_KEY`: 암호화 키 (32자 이상)
+
+## 로컬 실행
 
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 포트 지정 실행
+npm run dev -- -p 3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+개발 서버: http://localhost:3000 (또는 지정한 포트)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Vercel 배포
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. GitHub 저장소에 푸시
+2. Vercel에서 프로젝트 import
+3. Environment Variables에 `.env.local`의 변수들 추가
+4. Deploy 버튼 클릭
 
-## Learn More
+## Google Sheets 설정
 
-To learn more about Next.js, take a look at the following resources:
+인증서 데이터는 다음 형식으로 Google Sheets에 저장되어야 합니다:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| A (인증서 코드) | B (이름) | C (내용) | D (후원구분) | E (발급기관) | F (후원일) |
+|----------------|---------|---------|-------------|-------------|-----------|
+| 1              | 홍길동   | ...     | 개인        | 대한학생회   | 2024-12-19 |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 시트 이름: **시트1** (한글)
+- 범위: A:F
 
-## Deploy on Vercel
+## 보안
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 인증번호는 AES-256-CBC로 암호화되어 URL에 표시됩니다
+- `.env.local` 파일은 절대 Git에 커밋하지 않습니다
+- Vercel의 Environment Variables를 사용하여 안전하게 배포합니다
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 라이선스
+
+Private - 대한학생회

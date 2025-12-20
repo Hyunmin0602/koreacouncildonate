@@ -1,4 +1,4 @@
-import CertificateCard from '@/components/CertificateCard';
+import CertificateView from '@/components/CertificateView';
 import { getCertificateFromSheet } from '@/lib/google-sheets';
 import { decryptId } from '@/lib/crypto';
 import type { Metadata } from 'next';
@@ -67,8 +67,6 @@ export default async function CertificatePage({ params }: Props) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-            <CertificateCard data={data} />
-        </div>
+        <CertificateView data={data} />
     );
 }

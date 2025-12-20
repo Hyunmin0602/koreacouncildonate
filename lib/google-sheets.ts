@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 
 export interface DonationRow {
     name: string;
+    content: string;
     type: string;
     agency: string;
     date: string;
@@ -57,6 +58,7 @@ export async function getCertificateFromSheet(certId: string): Promise<DonationR
 
         return {
             name: matchedRow[1] || '정보 없음', // Column B
+            content: matchedRow[2] || '정보 없음', // Column C
             type: matchedRow[3] || '정보 없음', // Column D
             agency: matchedRow[4] || '정보 없음', // Column E
             date: matchedRow[5] || '정보 없음', // Column F

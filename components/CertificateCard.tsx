@@ -36,7 +36,7 @@ export default function CertificateCard({ data, containerRef }: { data: Certific
         {/* Top Decoration Bar */}
         <div className="h-4 bg-gradient-to-r from-[#2563eb] via-[#3b82f6] to-[#4f46e5]"></div>
 
-        <div className="p-8 md:p-10 relative">
+        <div className="p-6 md:p-10 relative">
           {/* Background Logo Watermark */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96 opacity-[0.03] pointer-events-none">
             <Image src="/images/logo.png" alt="Watermark" fill className="object-contain grayscale" />
@@ -65,7 +65,7 @@ export default function CertificateCard({ data, containerRef }: { data: Certific
           </div>
 
           {/* Content Body */}
-          <div className="relative z-10 space-y-8">
+          <div className="relative z-10 space-y-6 md:space-y-8">
             <div className="text-center space-y-2">
               <p className="text-[#64748b] text-lg">
                 귀하는 대한학생회의 투명한 후원 문화에 동참하여<br className="hidden md:block" />

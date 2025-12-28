@@ -1,16 +1,31 @@
 'use client';
 
-import { useActionState } from 'react';
-// import { useFormState } from 'react-dom'; // For older Next.js versions if needed, but 14+ uses useFormState or useActionState
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { checkAndRedirect } from '@/app/actions';
 
-// We need to define the initial state
-const initialState = {
+// Define the state type explicitly for better type checking
+interface FormState {
+    error?: string;
+    success?: boolean;
+    redirectUrl?: string;
+}
+
+const initialState: FormState = {
     error: '',
 };
 
 export default function SearchForm() {
+    const router = useRouter();
     const [state, formAction, isPending] = useActionState(checkAndRedirect, initialState);
+
+    // Handle redirection when state changes indicate success
+    useEffect(() => {
+        if (state?.success && state?.redirectUrl) {
+            // Force a hard navigation to ensure we leave the page
+            window.location.href = state.redirectUrl;
+        }
+    }, [state]);
 
     return (
         <form action={formAction} className="space-y-8">
@@ -44,8 +59,7 @@ export default function SearchForm() {
                         required
                         autoComplete="off"
                         onChange={() => {
-                            // Optional: Clear error on input change if we managed state manually, 
-                            // but with server actions it's simpler to just let the next submit clear it or leave it.
+                            // Optional: Clear error on input change if we managed state manually
                         }}
                     />
                     {isPending && (
@@ -64,13 +78,13 @@ export default function SearchForm() {
 
             <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || (state?.success ?? false)}
                 className="group w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xl font-bold py-5 px-6 rounded-xl transition-all duration-300 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/40 hover:-translate-y-1 transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
                 <span>
-                    {isPending ? '확인 중...' : '인증서 확인하기'}
+                    {isPending || state?.success ? '확인 중...' : '인증서 확인하기'}
                 </span>
-                {!isPending && (
+                {!(isPending || state?.success) && (
                     <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>

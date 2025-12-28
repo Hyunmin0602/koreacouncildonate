@@ -1,6 +1,7 @@
 
-
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { verifyDonorId } from '@/lib/auth';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -8,6 +9,12 @@ interface PageProps {
 
 export default async function SpendingPage({ params }: PageProps) {
     const { id } = await params;
+
+    const authResult = verifyDonorId(id);
+
+    if (!authResult) {
+        redirect('/');
+    }
 
     // Hardcoded sample data as requested
     const spendingData = [

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCertificateFromSheet } from '@/lib/google-sheets';
+import { verifyDonorId } from '@/lib/auth';
 import CertificateView from '@/components/CertificateView';
 
 interface PageProps {
@@ -9,20 +10,13 @@ interface PageProps {
 export default async function CertificatePage({ params }: PageProps) {
     const { id } = await params;
 
-    // Decode logic
-    let certNumber = '';
-    try {
-        const decoded = Buffer.from(id, 'base64url').toString('utf-8');
-        const parts = decoded.split(':');
-        certNumber = parts[1] || '';
-    } catch (e) {
-        console.error(e);
+    const authResult = verifyDonorId(id);
+
+    if (!authResult) {
         redirect('/');
     }
 
-    if (!certNumber) {
-        redirect('/');
-    }
+    const { certNumber } = authResult;
 
     const donorData = await getCertificateFromSheet(certNumber);
 

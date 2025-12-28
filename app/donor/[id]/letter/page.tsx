@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { verifyDonorId } from '@/lib/auth';
 import MotionContainer from '@/components/MotionContainer';
 
 interface PageProps {
@@ -7,6 +9,12 @@ interface PageProps {
 
 export default async function LetterPage({ params }: PageProps) {
     const { id } = await params;
+
+    const authResult = verifyDonorId(id);
+
+    if (!authResult) {
+        redirect('/');
+    }
 
     return (
         <div className="min-h-screen bg-amber-50/50 py-12 px-4">

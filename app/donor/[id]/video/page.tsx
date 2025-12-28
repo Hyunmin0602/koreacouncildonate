@@ -1,6 +1,7 @@
 
-
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { verifyDonorId } from '@/lib/auth';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -8,6 +9,12 @@ interface PageProps {
 
 export default async function VideoPage({ params }: PageProps) {
     const { id } = await params;
+
+    const authResult = verifyDonorId(id);
+
+    if (!authResult) {
+        redirect('/');
+    }
 
     return (
         <div className="min-h-screen bg-rose-50/50 py-12 px-4">

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCertificateFromSheet } from '@/lib/google-sheets';
+import { verifyDonorId } from '@/lib/auth';
 import ThankYouCard from '@/components/ThankYouCard';
 import MenuCard from '@/components/MenuCard';
 
@@ -10,23 +11,13 @@ interface DonorPageProps {
 export default async function DonorPortalPage({ params }: DonorPageProps) {
     const { id } = await params;
 
-    // Decode the ID to get name and certNumber
-    let name = '';
-    let certNumber = '';
+    const authResult = verifyDonorId(id);
 
-    try {
-        const decoded = Buffer.from(id, 'base64url').toString('utf-8');
-        const [decodedName, decodedCertNumber] = decoded.split(':');
-        name = decodedName || '';
-        certNumber = decodedCertNumber || '';
-    } catch (error) {
-        console.error('Failed to decode ID:', error);
+    if (!authResult) {
         redirect('/');
     }
 
-    if (!name || !certNumber) {
-        redirect('/');
-    }
+    const { name, certNumber } = authResult;
 
     // Fetch donor data using the existing getCertificateFromSheet function
     const donorData = await getCertificateFromSheet(certNumber);
@@ -35,7 +26,8 @@ export default async function DonorPortalPage({ params }: DonorPageProps) {
         redirect('/');
     }
 
-    // Verify name matches
+    // Verify name matches (Double check against sheet data)
+    // Even though signature is valid, we ensure the sheet data hasn't changed or we aren't displaying mismatching data
     const sheetName = donorData.name.replace(/\s+/g, '').toLowerCase();
     const paramName = name.replace(/\s+/g, '').toLowerCase();
 

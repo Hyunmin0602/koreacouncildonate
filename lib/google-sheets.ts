@@ -108,12 +108,12 @@ async function fetchSpending(certId: string): Promise<SpendingRow | null> {
         // money sheet columns:
         // A: CertCode, B: Name, C: Amount (CSV), D: Usage (CSV), E: Date (CSV), F: Note (CSV)
         // We need to parse CSVs
-        const amounts = matchedRow[2] ? matchedRow[2].split(',').map(s => s.trim()) : [];
-        const usages = matchedRow[3] ? matchedRow[3].split(',').map(s => s.trim()) : [];
-        const dates = matchedRow[4] ? matchedRow[4].split(',').map(s => s.trim()) : [];
-        const notes = matchedRow[5] ? matchedRow[5].split(',').map(s => s.trim()) : [];
+        const amounts = matchedRow[2] ? matchedRow[2].split(',').map((s: string) => s.trim()) : [];
+        const usages = matchedRow[3] ? matchedRow[3].split(',').map((s: string) => s.trim()) : [];
+        const dates = matchedRow[4] ? matchedRow[4].split(',').map((s: string) => s.trim()) : [];
+        const notes = matchedRow[5] ? matchedRow[5].split(',').map((s: string) => s.trim()) : [];
 
-        const items: SpendingData[] = amounts.map((amount, idx) => ({
+        const items: SpendingData[] = amounts.map((amount: string, idx: number) => ({
             amount,
             usage: usages[idx] || '',
             date: dates[idx] || '',

@@ -11,7 +11,7 @@ export default function ThankYouCard({ donorName }: ThankYouCardProps) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl p-8 mb-12 shadow-xl border border-blue-100 relative overflow-hidden"
+            className="glass-panel rounded-3xl p-8 mb-12 relative overflow-hidden"
         >
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-bl-full -mr-32 -mt-32 opacity-50" />
 

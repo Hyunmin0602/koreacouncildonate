@@ -23,8 +23,8 @@ export default function MenuCard({ title, description, icon, href, color, disabl
     const cardContent = (
         <motion.div
             whileHover={!disabled ? { y: -5 } : undefined}
-            className={`group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 h-full relative overflow-hidden
-                ${!disabled ? 'hover:shadow-xl transition-all duration-300 cursor-pointer' : 'opacity-70 cursor-not-allowed bg-gray-50'}
+            className={`group rounded-2xl p-6 h-full relative overflow-hidden
+                ${!disabled ? 'glass-panel hover:bg-white/40 transition-all duration-300 cursor-pointer' : 'opacity-70 cursor-not-allowed bg-white/50 border border-white/40'}
             `}
         >
             {disabled && (

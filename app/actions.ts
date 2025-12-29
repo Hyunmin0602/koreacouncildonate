@@ -1,6 +1,7 @@
 'use server';
 
 import { getCertificateFromSheet } from "@/lib/google-sheets";
+import { generateSignedDonorId } from "@/lib/auth";
 
 export async function checkAndRedirect(prevState: any, formData: FormData) {
     const certId = formData.get('certId')?.toString().trim();
@@ -28,7 +29,7 @@ export async function checkAndRedirect(prevState: any, formData: FormData) {
         }
 
         // Return URL for client-side redirection
-        const encoded = Buffer.from(`${name}:${certId}`).toString('base64url');
+        const encoded = generateSignedDonorId(name, certId);
         console.log('Validation success, returning redirect URL:', `/donor/${encoded}`);
         return { success: true, redirectUrl: `/donor/${encoded}` };
 

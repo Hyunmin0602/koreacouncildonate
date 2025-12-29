@@ -1,7 +1,7 @@
-
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { verifyDonorId } from '@/lib/auth';
+import { getSpendingData } from '@/lib/google-sheets';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -17,12 +17,37 @@ export default async function SpendingPage({ params }: PageProps) {
     }
 
     // Hardcoded sample data as requested
-    const spendingData = [
-        { category: '학생 행사 운영', amount: '1,500,000원', detail: '제7회 학생회 정보 교류의 장' },
-        { category: '학생 복지 지원', amount: '800,000원', detail: '시험기간 간식 사업' },
-        { category: '운영비', amount: '200,000원', detail: '회의실 대관 및 사무용품' },
-        { category: '동아리 지원', amount: '500,000원', detail: '우수 동아리 시상금' },
-    ];
+    const { name, certNumber } = authResult;
+
+    // Fetch real spending data
+    const spendingData = await getSpendingData(certNumber);
+
+    if (!spendingData) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-red-50">
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-red-200">
+                    <h1 className="text-xl font-bold text-red-600 mb-2">데이터 오류</h1>
+                    <p className="text-gray-600">사용 내역 정보를 불러올 수 없습니다.</p>
+                    <Link href={`/donor/${id}`} className="mt-4 inline-block text-blue-600 underline">돌아가기</Link>
+                </div>
+            </div>
+        );
+    }
+
+    // Verify name match again for security
+    const sheetName = spendingData.name.replace(/\s+/g, '').toLowerCase();
+    const paramName = name.replace(/\s+/g, '').toLowerCase();
+
+    if (sheetName !== paramName) {
+        redirect('/');
+    }
+
+    // Calculate Total
+    const totalAmount = spendingData.items.reduce((sum, item) => {
+        const value = parseInt(item.amount.replace(/[^0-9]/g, ''), 10) || 0;
+        return sum + value;
+    }, 0);
+    const formattedTotal = totalAmount.toLocaleString() + '원';
 
     return (
         <div className="min-h-screen bg-emerald-50/50 py-12 px-4">
@@ -48,30 +73,28 @@ export default async function SpendingPage({ params }: PageProps) {
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="border-b border-gray-200">
-                                        <th className="pb-4 font-semibold text-gray-600">카테고리</th>
-                                        <th className="pb-4 font-semibold text-gray-600">상세내용</th>
+                                        <th className="pb-4 font-semibold text-gray-600">사용처</th>
                                         <th className="pb-4 font-semibold text-gray-600 text-right">금액</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {spendingData.map((item, index) => (
+                                    {spendingData.items.map((item, index) => (
                                         <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                            <td className="py-4 text-emerald-600 font-medium">{item.category}</td>
-                                            <td className="py-4 text-gray-600">{item.detail}</td>
-                                            <td className="py-4 text-gray-900 font-bold text-right">{item.amount}</td>
+                                            <td className="py-4 text-emerald-600 font-medium">{item.usage}</td>
+                                            <td className="py-4 text-gray-900 font-bold text-right">
+                                                {parseInt(item.amount).toLocaleString()}원
+                                            </td>
                                         </tr>
                                     ))}
                                     <tr className="bg-gray-50">
-                                        <td colSpan={2} className="py-4 px-4 font-bold text-gray-900">총계</td>
-                                        <td className="py-4 px-4 font-bold text-blue-600 text-right">3,000,000원</td>
+                                        <td className="py-4 px-4 font-bold text-gray-900">총계</td>
+                                        <td className="py-4 px-4 font-bold text-blue-600 text-right">{formattedTotal}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <div className="mt-8 p-4 bg-gray-50 rounded-lg text-sm text-gray-500 text-center">
-                            * 본 내역은 예시 데이터이며, 실제 후원금 내역은 추후 연동될 예정입니다.
-                        </div>
+
                     </div>
                 </div>
             </div>

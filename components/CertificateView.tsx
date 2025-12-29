@@ -142,18 +142,29 @@ export default function CertificateView({ data, backHref, backLabel }: Certifica
             const imgWidth = img.width;
             const imgHeight = img.height;
 
-            // Calculate PDF dimensions to fit the entire certificate
-            // A4 width is 210mm
-            const a4Width = 210;
-            const pdfWidth = a4Width;
-            const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+            // A4 dimensions in mm
+            const a4WidthMm = 210;
+            const a4HeightMm = 297;
 
-            // Create PDF with custom height to fit the entire certificate without cropping
-            const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+            // Create PDF with A4 size
+            const pdf = new jsPDF('p', 'mm', 'a4');
 
-            // Add image filling the entire page
-            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`certificate_${data.certNumber}.pdf`);
+            // Calculate scale to fit image within A4 while maintaining aspect ratio
+            const margin = 10; // 10mm margin on all sides
+            const maxWidth = a4WidthMm - (margin * 2);
+            const maxHeight = a4HeightMm - (margin * 2);
+
+            const scale = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+            const scaledWidth = imgWidth * scale;
+            const scaledHeight = imgHeight * scale;
+
+            // Center the image on the A4 page
+            const x = (a4WidthMm - scaledWidth) / 2;
+            const y = (a4HeightMm - scaledHeight) / 2;
+
+            // Add image to PDF
+            pdf.addImage(dataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
+            pdf.save(`certificate_${data.certNumber}_A4.pdf`);
 
         } catch (error) {
             console.error('PDF Download Error:', error);

@@ -138,7 +138,7 @@ export default async function DonorPortalPage({ params }: DonorPageProps) {
                         요리하는 학생자치 🥖
                     </h1>
                     <p className="text-lg text-slate-600 leading-relaxed max-w-lg mx-auto font-medium">
-                        보내주신 소중한 재료(후원금)으로<br />
+                        보내주신 소중한 재료(후원금)로<br />
                         학생들의 자치 시스템이라는 특별한 요리를 만들고 있습니다.
                     </p>
                 </div>

@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { unstable_cache } from 'next/cache';
 
 export interface DonationRow {
     name: string;
@@ -12,6 +13,8 @@ export interface DonationRow {
 export interface SpendingData {
     amount: string;
     usage: string;
+    date: string;
+    note: string;
 }
 
 export interface SpendingRow {
@@ -20,9 +23,9 @@ export interface SpendingRow {
     items: SpendingData[];
 }
 
-export async function getCertificateFromSheet(certId: string): Promise<DonationRow | null> {
+// 1. Internal Fetcher for Certificate
+async function fetchCertificate(certId: string): Promise<DonationRow | null> {
     try {
-        // 1. Auth
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -32,9 +35,6 @@ export async function getCertificateFromSheet(certId: string): Promise<DonationR
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-
-        // 2. Fetch Data
-        // Fetching Columns A to F
         const range = '시트1!A:F';
         const sheetId = process.env.GOOGLE_SHEET_ID;
 
@@ -49,42 +49,35 @@ export async function getCertificateFromSheet(certId: string): Promise<DonationR
         });
 
         const rows = response.data.values;
-        if (!rows || rows.length === 0) {
-            return null;
-        }
+        if (!rows || rows.length === 0) return null;
 
-        // 3. Find the row matching the specific ID
-        // Column Mapping based on User Screenshot:
-        // A (0): 인증서 코드 (Cert Number)
-        // B (1): 이름 (Name)
-        // C (2): 내용 (Content)
-        // D (3): 후원구분 (Type)
-        // E (4): 발급기관 (Agency)
-        // F (5): 후원일 (Date)
+        // Skip header (row 1)
+        const dataRows = rows.slice(1);
 
-        // We search for the certID in Column A (index 0)
-        const matchedRow = rows.find((row) => row[0]?.toString().trim() === certId.toString().trim());
+        // Find row where Column A (Cert Number) matches certId
+        // Column Index: 0=CertNum, 1=Name, 2=Content, 3=Type, 4=Agency, 5=Date
+        const matchedRow = dataRows.find((row) => row[0] === certId);
 
         if (!matchedRow) return null;
 
         return {
-            name: matchedRow[1] || '정보 없음', // Column B
-            content: matchedRow[2] || '정보 없음', // Column C
-            type: matchedRow[3] || '정보 없음', // Column D
-            agency: matchedRow[4] || '정보 없음', // Column E
-            date: matchedRow[5] || '정보 없음', // Column F
-            certNumber: matchedRow[0] || certId, // Column A
+            certNumber: matchedRow[0] || '',
+            name: matchedRow[1] || '',
+            content: matchedRow[2] || '',
+            type: matchedRow[3] || '',
+            agency: matchedRow[4] || '',
+            date: matchedRow[5] || '',
         };
 
     } catch (error) {
-        console.error('Google Sheets API Error:', error);
+        console.error("Error fetching certificate from sheet:", error);
         return null;
     }
 }
 
-export async function getSpendingData(certId: string): Promise<SpendingRow | null> {
+// 2. Internal Fetcher for Spending
+async function fetchSpending(certId: string): Promise<SpendingRow | null> {
     try {
-        // 1. Auth
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -94,20 +87,10 @@ export async function getSpendingData(certId: string): Promise<SpendingRow | nul
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-
-        // 2. Fetch Data from 'money' tab
-        // Fetching Columns A to D
-        // A: Cert Code
-        // B: Name
-        // C: Amount (comma separated)
-        // D: Usage (comma separated)
-        const range = 'money!A:D';
+        const range = 'money!A:F'; // Extended range to cover more columns if needed
         const sheetId = process.env.GOOGLE_SHEET_ID;
 
-        if (!sheetId) {
-            console.error("Missing GOOGLE_SHEET_ID");
-            return null;
-        }
+        if (!sheetId) return null;
 
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
@@ -115,43 +98,100 @@ export async function getSpendingData(certId: string): Promise<SpendingRow | nul
         });
 
         const rows = response.data.values;
-        if (!rows || rows.length === 0) {
-            return null;
-        }
+        if (!rows || rows.length === 0) return null;
 
-        // 3. Find the row matching the specific ID
-        const matchedRow = rows.find((row) => row[0]?.toString().trim() === certId.toString().trim());
+        const dataRows = rows.slice(1);
+        const matchedRow = dataRows.find((row) => row[0] === certId);
 
         if (!matchedRow) return null;
 
-        const name = matchedRow[1] || '';
-        const rawAmounts = matchedRow[2] || '';
-        const rawUsages = matchedRow[3] || '';
+        // money sheet columns:
+        // A: CertCode, B: Name, C: Amount (CSV), D: Usage (CSV), E: Date (CSV), F: Note (CSV)
+        // We need to parse CSVs
+        const amounts = matchedRow[2] ? matchedRow[2].split(',').map(s => s.trim()) : [];
+        const usages = matchedRow[3] ? matchedRow[3].split(',').map(s => s.trim()) : [];
+        const dates = matchedRow[4] ? matchedRow[4].split(',').map(s => s.trim()) : [];
+        const notes = matchedRow[5] ? matchedRow[5].split(',').map(s => s.trim()) : [];
 
-        // 4. Parse CSV data
-        const amounts = rawAmounts.split(',').map((s: string) => s.trim());
-        const usages = rawUsages.split(',').map((s: string) => s.trim());
-
-        const items: SpendingData[] = [];
-        const maxLength = Math.max(amounts.length, usages.length);
-
-        for (let i = 0; i < maxLength; i++) {
-            if (amounts[i] || usages[i]) {
-                items.push({
-                    amount: amounts[i] || '0',
-                    usage: usages[i] || '내역 없음',
-                });
-            }
-        }
+        const items: SpendingData[] = amounts.map((amount, idx) => ({
+            amount,
+            usage: usages[idx] || '',
+            date: dates[idx] || '',
+            note: notes[idx] || ''
+        }));
 
         return {
-            certNumber: matchedRow[0] || certId,
-            name,
-            items,
+            certNumber: matchedRow[0],
+            name: matchedRow[1],
+            items
         };
 
     } catch (error) {
-        console.error('Google Sheets API Error (Spending):', error);
+        console.error("Error fetching spending from sheet:", error);
         return null;
     }
 }
+
+// 3. Export Cached Versions
+export const getCertificateFromSheet = unstable_cache(
+    fetchCertificate,
+    ['certificate-data'], // Key prefix
+    { revalidate: 60, tags: ['certificate'] } // Cache for 60 seconds
+);
+
+export const getSpendingData = unstable_cache(
+    fetchSpending,
+    ['spending-data'], // Key prefix
+    { revalidate: 60, tags: ['spending'] } // Cache for 60 seconds
+);
+
+// 4. Get Impact Statistics (cached for 1 hour)
+export const getImpactStats = unstable_cache(
+    async (): Promise<{ totalDonors: number; totalAmount: number } | null> => {
+        try {
+            const auth = new google.auth.GoogleAuth({
+                credentials: {
+                    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                },
+                scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+            });
+
+            const sheets = google.sheets({ version: 'v4', auth });
+            const sheetId = process.env.GOOGLE_SHEET_ID;
+
+            if (!sheetId) {
+                console.error("Missing GOOGLE_SHEET_ID");
+                return null;
+            }
+
+            // Fetch all donor data
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: '시트1!A:F',
+            });
+
+            const rows = response.data.values;
+            if (!rows || rows.length <= 1) {
+                return { totalDonors: 0, totalAmount: 0 };
+            }
+
+            // Count unique donors (excluding header)
+            const totalDonors = rows.length - 1;
+
+            // Calculate total amount from "content" column (assuming it contains amount info)
+            // This is a placeholder - adjust based on actual data structure
+            const totalAmount = 0; // TODO: Parse actual amounts if available in sheets
+
+            return { totalDonors, totalAmount };
+        } catch (error) {
+            console.error('Error fetching impact stats:', error);
+            return null;
+        }
+    },
+    ['impact-stats'],
+    {
+        revalidate: 3600, // Cache for 1 hour
+        tags: ['impact-stats']
+    }
+);

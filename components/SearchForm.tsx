@@ -39,7 +39,7 @@ export default function SearchForm() {
                         type="text"
                         name="name"
                         placeholder="홍길동"
-                        className="w-full px-4 py-3 bg-white/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all duration-300"
+                        className="w-full px-4 py-3 bg-white/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all duration-300"
                         required
                         autoComplete="name"
                     />
@@ -57,14 +57,14 @@ export default function SearchForm() {
                             placeholder="예: 2024-DONATE-001"
                             className={`w-full px-4 py-3 bg-white/50 border rounded-xl text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:outline-none transition-all duration-300 ${state?.error
                                 ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
+                                : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500/10'
                                 }`}
                             required
                             autoComplete="off"
                         />
                         {isPending && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                         )}
                     </div>
@@ -85,7 +85,7 @@ export default function SearchForm() {
             <button
                 type="submit"
                 disabled={isPending || (state?.success ?? false)}
-                className="group w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 text-white text-lg font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                className="group w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 text-white text-lg font-extrabold py-4 px-6 rounded-2xl transition-all duration-300 shadow-lg shadow-orange-200 hover:shadow-xl hover:-translate-y-1 transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             >
                 <span>
                     {isPending || state?.success ? '확인 중...' : '인증서 조회하기'}

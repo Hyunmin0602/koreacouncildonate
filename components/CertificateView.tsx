@@ -21,7 +21,11 @@ interface CertificateViewProps {
     backLabel?: string;
 }
 
-export default function CertificateView({ data, backHref = '/', backLabel = '메인으로' }: CertificateViewProps) {
+export default function CertificateView({ data, backHref, backLabel }: CertificateViewProps) {
+    const finalBackHref = backHref || '/';
+    const finalBackLabel = backLabel || '메인으로';
+
+    console.log('CertificateView Props:', { backHref, backLabel, finalBackHref });
     const cardRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
 
@@ -127,15 +131,9 @@ export default function CertificateView({ data, backHref = '/', backLabel = '메
                 style: {
                     borderRadius: '0',
                     boxShadow: 'none',
-                    margin: '0', // Ensure no margin
+                    margin: '0',
                 }
             });
-
-            // Calculate PDF dimensions (A4 size generally, or match the card aspect ratio)
-            // A4 is 210mm x 297mm
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
 
             const img = new Image();
             img.src = dataUrl;
@@ -144,15 +142,17 @@ export default function CertificateView({ data, backHref = '/', backLabel = '메
             const imgWidth = img.width;
             const imgHeight = img.height;
 
-            // Scale image to fit A4 width exactly (as requested)
-            const finalWidth = pdfWidth;
-            const finalHeight = (imgHeight * finalWidth) / imgWidth;
+            // Calculate PDF dimensions to fit the entire certificate
+            // A4 width is 210mm
+            const a4Width = 210;
+            const pdfWidth = a4Width;
+            const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
 
-            // If finalHeight exceeds pdfHeight (which shouldn't happen often after CSS tightening),
-            // it might clip. But user prioritized "Border match width".
-            // Ideally the CSS change makes it fit perfectly.
+            // Create PDF with custom height to fit the entire certificate without cropping
+            const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
 
-            pdf.addImage(dataUrl, 'PNG', 0, 0, finalWidth, finalHeight);
+            // Add image filling the entire page
+            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`certificate_${data.certNumber}.pdf`);
 
         } catch (error) {
@@ -164,9 +164,9 @@ export default function CertificateView({ data, backHref = '/', backLabel = '메
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 gap-8">
+        <div className="min-h-screen bg-orange-50 flex flex-col items-center justify-center p-4 gap-8">
             {/* Wrapper to capture */}
-            <div className="w-full flex justify-center bg-gray-100">
+            <div className="w-full flex justify-center bg-orange-50">
                 {/* We pass the ref directly to the inner card container now for precise cropping */}
                 <div className="w-full max-w-2xl">
                     <CertificateCard data={data} containerRef={cardRef} />
@@ -175,19 +175,19 @@ export default function CertificateView({ data, backHref = '/', backLabel = '메
 
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl justify-center px-4">
                 <Link
-                    href={backHref}
-                    className="px-6 py-3 rounded-xl border-2 border-slate-300 text-slate-500 font-bold hover:border-blue-600 hover:text-blue-600 transition-colors flex items-center justify-center gap-2 bg-white"
+                    href={finalBackHref}
+                    className="px-6 py-3 rounded-2xl border border-slate-100 text-slate-700 font-bold hover:text-orange-600 hover:border-orange-200 transition-all flex items-center justify-center gap-2 bg-white shadow-md hover:shadow-xl hover:-translate-y-1"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    {backLabel}
+                    {finalBackLabel}
                 </Link>
 
                 <button
                     onClick={handleDownloadImage}
                     disabled={isDownloading}
-                    className="px-6 py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 hover:-translate-y-1 transition-all shadow-lg shadow-green-600/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white font-extrabold hover:from-orange-600 hover:to-orange-700 hover:-translate-y-1 transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                     {isDownloading ? (
                         <>
@@ -210,7 +210,7 @@ export default function CertificateView({ data, backHref = '/', backLabel = '메
                 <button
                     onClick={handleDownloadPdf}
                     disabled={isDownloading}
-                    className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 hover:-translate-y-1 transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-br from-stone-600 to-stone-700 text-white font-extrabold hover:from-stone-700 hover:to-stone-800 hover:-translate-y-1 transition-all shadow-lg shadow-stone-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                     {isDownloading ? (
                         <>

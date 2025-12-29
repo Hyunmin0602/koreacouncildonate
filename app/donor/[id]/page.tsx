@@ -263,6 +263,48 @@ export default async function DonorPortalPage({ params }: DonorPageProps) {
 
                 </div>
 
+                {/* Useful Links Section */}
+                <div className="mt-16 mb-12">
+                    <h3 className="text-center text-lg font-extrabold text-slate-900 mb-4">더 알아보기</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl mx-auto">
+                        <a href="/faq" className="block bg-white rounded-xl p-4 shadow-sm hover:shadow-lg border border-slate-100 hover:border-orange-200 transition-all duration-300 group hover:-translate-y-0.5">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                                    <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h4 className="text-sm font-extrabold text-slate-900">자주 묻는 질문</h4>
+                            </div>
+                            <p className="text-xs text-slate-600">궁금한 점을 빠르게 찾아보세요</p>
+                        </a>
+
+                        <a href="/donors" className="block bg-white rounded-xl p-4 shadow-sm hover:shadow-lg border border-slate-100 hover:border-amber-200 transition-all duration-300 group hover:-translate-y-0.5">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <h4 className="text-sm font-extrabold text-slate-900">명예의 전당</h4>
+                            </div>
+                            <p className="text-xs text-slate-600">함께하는 후원자분들</p>
+                        </a>
+
+                        <a href="/guestbook" className="block bg-white rounded-xl p-4 shadow-sm hover:shadow-lg border border-slate-100 hover:border-red-200 transition-all duration-300 group hover:-translate-y-0.5">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </div>
+                                <h4 className="text-sm font-extrabold text-slate-900">방명록</h4>
+                            </div>
+                            <p className="text-xs text-slate-600">응원 메시지 남기기</p>
+                        </a>
+                    </div>
+                </div>
+
                 {/* Footer / Home Link */}
                 <div className="mt-20 text-center animate-fade-in-up">
                     <a href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white shadow-md hover:shadow-xl border border-slate-100 text-slate-700 hover:text-orange-600 hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 font-semibold">

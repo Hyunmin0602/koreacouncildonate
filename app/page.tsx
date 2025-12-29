@@ -80,10 +80,32 @@ export default async function Home() {
 
                             <SearchForm />
 
-                            <div className="pt-6 border-t border-slate-100">
+                            <div className="pt-6 border-t border-slate-100 space-y-4">
                                 <p className="text-center text-xs text-slate-400 font-medium">
                                     Secure Verification powered by DonateCheck
                                 </p>
+
+                                {/* Quick Links - Inside Card */}
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Link href="/faq" className="flex flex-col items-center gap-1.5 px-2 py-3 bg-orange-50/50 hover:bg-orange-100/50 rounded-xl border border-orange-100/50 hover:border-orange-200 transition-all text-xs font-semibold text-slate-700 hover:text-orange-600">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        FAQ
+                                    </Link>
+                                    <Link href="/donors" className="flex flex-col items-center gap-1.5 px-2 py-3 bg-amber-50/50 hover:bg-amber-100/50 rounded-xl border border-amber-100/50 hover:border-amber-200 transition-all text-xs font-semibold text-slate-700 hover:text-amber-600">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        명예의 전당
+                                    </Link>
+                                    <Link href="/guestbook" className="flex flex-col items-center gap-1.5 px-2 py-3 bg-red-50/50 hover:bg-red-100/50 rounded-xl border border-red-100/50 hover:border-red-200 transition-all text-xs font-semibold text-slate-700 hover:text-red-600">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        방명록
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>

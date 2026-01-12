@@ -1,9 +1,16 @@
 import Link from 'next/link';
 import FadeInWhenVisible from '@/components/FadeInWhenVisible';
+import { getGuestbookMessages } from '@/lib/google-sheets';
 
-export default function GuestbookPage() {
-    //  Guest messages would be stored in Google Sheets
-    // For now, showing a simple placeholder
+export default async function GuestbookPage() {
+    const messages = await getGuestbookMessages();
+
+    const anonymize = (name: string) => {
+        if (!name || name === '익명') return '익명';
+        if (name.length <= 1) return name;
+        if (name.length === 2) return name[0] + '*';
+        return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+    };
 
     return (
         <div className="min-h-screen bg-orange-50 py-12 px-4">
@@ -30,40 +37,55 @@ export default function GuestbookPage() {
                                 </div>
                                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">후원자 방명록</h1>
                             </div>
-                            <p className="text-orange-700 font-medium">따뜻한 응원의 메시지를 남겨주세요</p>
+                            <p className="text-orange-700 font-medium">따뜻한 응원의 메시지를 확인해보세요</p>
                         </div>
                     </div>
                 </FadeInWhenVisible>
 
-                {/* Coming Soon */}
-                <FadeInWhenVisible delay={0.1}>
-                    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-12 text-center">
-                        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-orange-100 flex items-center justify-center">
-                            <svg className="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-2xl font-extrabold text-slate-900 mb-2">준비 중입니다</h3>
-                        <p className="text-slate-600 leading-relaxed max-w-md mx-auto mb-6">
-                            후원자분들의 따뜻한 응원 메시지를 남길 수 있는 방명록을 준비하고 있습니다.
-                        </p>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Coming Soon
-                        </div>
-                    </div>
-                </FadeInWhenVisible>
+                {/* Message List */}
+                <div className="grid gap-6">
+                    {messages.length > 0 ? (
+                        messages.map((msg, idx) => (
+                            <FadeInWhenVisible key={idx} delay={idx * 0.05}>
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-xl">
+                                                🖊️
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-900">{anonymize(msg.name)}</p>
+                                                <p className="text-xs text-slate-500">{msg.date}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                                </div>
+                            </FadeInWhenVisible>
+                        ))
+                    ) : (
+                        <FadeInWhenVisible delay={0.1}>
+                            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-12 text-center">
+                                <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                    <svg className="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">아직 등록된 메시지가 없습니다</h3>
+                                <p className="text-slate-600">첫 번째 메시지의 주인공이 되어주세요!<br />후원 인증 후 메시지를 남기실 수 있습니다.</p>
+                            </div>
+                        </FadeInWhenVisible>
+                    )}
+                </div>
 
                 {/* Info */}
                 <FadeInWhenVisible delay={0.2}>
                     <div className="mt-8 bg-gradient-to-br from-orange-100 to-orange-50 rounded-3xl p-6 border border-orange-200">
                         <div className="text-center">
-                            <h4 className="font-extrabold text-slate-900 mb-2">방명록 기능 안내</h4>
+                            <h4 className="font-extrabold text-slate-900 mb-2">메시지 남기는 방법</h4>
                             <p className="text-sm text-slate-600 leading-relaxed">
-                                곧 후원자분들의 응원 메시지를 작성하고 공유할 수 있는 기능이 추가됩니다.<br />
-                                서로의 마음을 나누며 더 큰 힘을 얻을 수 있습니다.
+                                후원 인증 페이지로 접속하신 후, <br />
+                                <strong>방명록 남기기</strong> 섹션에서 따뜻한 메시지를 작성하실 수 있습니다.
                             </p>
                         </div>
                     </div>

@@ -38,3 +38,43 @@ export async function checkAndRedirect(prevState: any, formData: FormData) {
         return { error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' };
     }
 }
+
+import { postGuestbookMessage } from "@/lib/google-sheets";
+import { revalidateTag } from "next/cache";
+
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+export async function submitGuestbookMessage(prevState: any, formData: FormData) {
+    const message = formData.get('message')?.toString().trim();
+    const donorName = formData.get('donorName')?.toString().trim();
+
+    // Rate Limit Check
+    const headersList = await headers();
+    const ip = headersList.get('x-forwarded-for') || 'unknown';
+
+    // Limit: 5 posts per 60 seconds per IP
+    const isAllowed = checkRateLimit(ip, { limit: 5, windowMs: 60 * 1000 });
+
+    if (!isAllowed) {
+        return { success: false, error: '너무 많은 메시지를 보내셨습니다. 잠시 후 다시 시도해주세요.' };
+    }
+
+    if (!message || !donorName) {
+        return { success: false, error: '메시지를 입력해주세요.' };
+    }
+
+    try {
+        const result = await postGuestbookMessage(donorName, message);
+
+        if (result) {
+            revalidateTag('guestbook');
+            return { success: true, error: '' };
+        } else {
+            return { success: false, error: '메시지 저장에 실패했습니다.' };
+        }
+    } catch (error) {
+        console.error("Guestbook Submit Error:", error);
+        return { success: false, error: '서버 오류가 발생했습니다.' };
+    }
+}

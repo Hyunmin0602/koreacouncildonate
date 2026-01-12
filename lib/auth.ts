@@ -37,7 +37,10 @@ export function verifyDonorId(id: string): { name: string; certNumber: string } 
             .digest('hex')
             .substring(0, 16);
 
-        if (signature !== expectedSignature) {
+        const signatureBuffer = Buffer.from(signature, 'hex');
+        const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
+
+        if (signatureBuffer.length !== expectedSignatureBuffer.length || !crypto.timingSafeEqual(signatureBuffer, expectedSignatureBuffer)) {
             console.error('Signature mismatch');
             return null;
         }

@@ -31,7 +31,7 @@ async function fetchCertificate(certId: string): Promise<DonationRow | null> {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
                 private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
             },
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
@@ -194,4 +194,174 @@ export const getImpactStats = unstable_cache(
         revalidate: 3600, // Cache for 1 hour
         tags: ['impact-stats']
     }
+);
+
+// 7. Post Guestbook Message
+export async function postGuestbookMessage(name: string, message: string): Promise<boolean> {
+    try {
+        const auth = new google.auth.GoogleAuth({
+            credentials: {
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            },
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        });
+
+        const sheets = google.sheets({ version: 'v4', auth });
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+
+        if (!sheetId) return false;
+
+        const date = new Date().toISOString().split('T')[0];
+
+        // Append to 'guestbook' sheet: Column A: Date, B: Name, C: Message
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: 'guestbook!A:C',
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [[date, name, message]],
+            },
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Error posting guestbook message:', error);
+        return false;
+    }
+}
+
+// 8. Get Guestbook Messages
+export const getGuestbookMessages = unstable_cache(
+    async (): Promise<{ date: string; name: string; message: string }[]> => {
+        try {
+            const auth = new google.auth.GoogleAuth({
+                credentials: {
+                    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                },
+                scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+            });
+
+            const sheets = google.sheets({ version: 'v4', auth });
+            const sheetId = process.env.GOOGLE_SHEET_ID;
+
+            if (!sheetId) return [];
+
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: 'guestbook!A:C',
+            });
+
+            const rows = response.data.values;
+            if (!rows || rows.length <= 1) return [];
+
+            // Skip header and reverse to show newest first
+            return rows.slice(1).reverse().map(row => ({
+                date: row[0] || '',
+                name: row[1] || '익명',
+                message: row[2] || ''
+            }));
+
+        } catch (error) {
+            console.error('Error fetching guestbook messages:', error);
+            return [];
+        }
+    },
+    ['guestbook-messages'],
+    { revalidate: 60, tags: ['guestbook'] } // Cache for 60s, invalidates on new post
+);
+
+// 6. Get All Donors (cached for 1 hour)
+export const getAllDonors = unstable_cache(
+    async (): Promise<{ name: string; date: string }[]> => {
+        try {
+            const auth = new google.auth.GoogleAuth({
+                credentials: {
+                    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                },
+                scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+            });
+
+            const sheets = google.sheets({ version: 'v4', auth });
+            const sheetId = process.env.GOOGLE_SHEET_ID;
+
+            if (!sheetId) {
+                console.error("Missing GOOGLE_SHEET_ID");
+                return [];
+            }
+
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: '시트1!A:F',
+            });
+
+            const rows = response.data.values;
+            if (!rows || rows.length <= 1) {
+                return [];
+            }
+
+            // Skip header (row 1) and map
+            const allDonors = rows.slice(1).reverse().map(row => ({
+                name: row[1] || '익명',
+                date: row[5] || '' // Date is in column F (index 5) based on DonationRow interface
+            }));
+
+            return allDonors;
+
+        } catch (error) {
+            console.error('Error fetching all donors:', error);
+            return [];
+        }
+    },
+    ['all-donors'],
+    { revalidate: 60, tags: ['donors'] }
+);
+
+// 5. Get Recent Donors (cached for 1 hour)
+export const getRecentDonors = unstable_cache(
+    async (limit: number = 3): Promise<{ name: string; message: string }[]> => {
+        try {
+            const auth = new google.auth.GoogleAuth({
+                credentials: {
+                    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                },
+                scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+            });
+
+            const sheets = google.sheets({ version: 'v4', auth });
+            const sheetId = process.env.GOOGLE_SHEET_ID;
+
+            if (!sheetId) {
+                console.error("Missing GOOGLE_SHEET_ID");
+                return [];
+            }
+
+            const response = await sheets.spreadsheets.values.get({
+                spreadsheetId: sheetId,
+                range: '시트1!A:F',
+            });
+
+            const rows = response.data.values;
+            if (!rows || rows.length <= 1) {
+                return [];
+            }
+
+            // Skip header and take recent rows (reverse order)
+            const recentRows = rows.slice(1).reverse().slice(0, limit);
+
+            return recentRows.map(row => ({
+                name: row[1] || '익명', // Name is in column B (index 1)
+                message: "따뜻한 마음을 나누어주셔서 감사합니다." // Default message
+            }));
+
+        } catch (error) {
+            console.error('Error fetching recent donors:', error);
+            return [];
+        }
+    },
+    ['recent-donors'],
+    { revalidate: 60, tags: ['donors'] }
 );

@@ -19,15 +19,12 @@ export default async function VideoPage({ params }: PageProps) {
 
     const { name } = authResult;
 
+    type MediaItem =
+        | { type: 'video'; title: string; description: string; embedUrl: string; date: string }
+        | { type: 'placeholder'; title: string; description: string; icon: string };
+
     // Sample media items - can be replaced with actual YouTube links or images
-    const mediaItems = [
-        {
-            type: 'video' as const,
-            title: '2024년 학생자치 활동 하이라이트',
-            description: `${name}님의 후원으로 만들어진 특별한 순간들입니다.`,
-            embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
-            date: '2024년 12월'
-        },
+    const mediaItems: MediaItem[] = [
         {
             type: 'placeholder' as const,
             title: '더 많은 영상이 준비 중입니다',

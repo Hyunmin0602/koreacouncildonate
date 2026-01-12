@@ -5,6 +5,8 @@ import ThankYouCard from '@/components/ThankYouCard';
 import MenuCard from '@/components/MenuCard';
 import ShareButton from '@/components/ShareButton';
 import FadeInWhenVisible from '@/components/FadeInWhenVisible';
+import GuestbookForm from '@/components/GuestbookForm';
+
 
 interface DonorPageProps {
     params: Promise<{ id: string }>;
@@ -261,6 +263,11 @@ export default async function DonorPortalPage({ params }: DonorPageProps) {
                         </div>
                     </FadeInWhenVisible>
 
+                </div>
+
+                {/* Guestbook Write Section */}
+                <div className="mt-16 mb-16 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                    <GuestbookForm donorName={donorData.name} />
                 </div>
 
                 {/* Useful Links Section */}

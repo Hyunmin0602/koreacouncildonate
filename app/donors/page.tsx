@@ -1,14 +1,6 @@
 import Link from 'next/link';
-import { getCertificateFromSheet } from '@/lib/google-sheets';
+import { getAllDonors } from '@/lib/google-sheets';
 import FadeInWhenVisible from '@/components/FadeInWhenVisible';
-
-// This would normally fetch from Google Sheets
-// For now, we'll use the donor data structure
-async function getAllDonors() {
-    // TODO: Implement actual fetching from Google Sheets
-    // This is a placeholder - in real implementation, fetch all rows from Sheet
-    return [];
-}
 
 export default async function HallOfFamePage() {
     const donors = await getAllDonors();
@@ -50,34 +42,34 @@ export default async function HallOfFamePage() {
                     </div>
                 </FadeInWhenVisible>
 
-                {/* Summary Stats */}
+                {/* Summary Stats - Modified as requested */}
                 <FadeInWhenVisible delay={0.1}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <div className="text-3xl">🥇</div>
-                                <div>
-                                    <p className="text-sm text-slate-500 font-medium">최고 후원</p>
-                                    <p className="text-2xl font-extrabold text-orange-600">Coming Soon</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        {/* Target Goal - Hardcoded for now as requested to show goal */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-2xl">
+                                🎯
+                            </div>
+                            <div>
+                                <p className="text-sm text-slate-500 font-medium mb-1">목표 달성률</p>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-extrabold text-blue-600">85%</span>
+                                    <span className="text-sm text-slate-400 font-medium">/ 100%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 rounded-full h-2 mt-2 w-32">
+                                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <div className="text-3xl">👥</div>
-                                <div>
-                                    <p className="text-sm text-slate-500 font-medium">총 후원자</p>
-                                    <p className="text-2xl font-extrabold text-slate-900">{donors.length}명</p>
-                                </div>
+
+                        {/* Total Donors */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center text-2xl">
+                                👥
                             </div>
-                        </div>
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <div className="text-3xl">❤️</div>
-                                <div>
-                                    <p className="text-sm text-slate-500 font-medium">따뜻한 마음</p>
-                                    <p className="text-2xl font-extrabold text-amber-600">100%</p>
-                                </div>
+                            <div>
+                                <p className="text-sm text-slate-500 font-medium mb-1">총 후원자</p>
+                                <p className="text-3xl font-extrabold text-slate-900">{donors.length}명</p>
                             </div>
                         </div>
                     </div>
